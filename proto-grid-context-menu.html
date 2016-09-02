@@ -1,0 +1,69 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="proto-context-menu.html">
+
+<!--
+`proto-context-menu`
+Context menu element prototype
+
+@demo demo/index.html 
+-->
+
+<dom-module id="proto-grid-context-menu">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <content></content>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'proto-grid-context-menu',
+
+      listeners: {
+        'grid-context-menu': '_onGridContextMenu',
+        'menu-item-click': '_onMenuItemClick'
+      },
+
+      _onGridContextMenu: function(event) {
+        event.preventDefault();
+
+        if (this._contextMenu) {
+          this._contextMenu.cancel();
+          Polymer.dom(this).removeChild(this._contextMenu);
+        }
+
+        var template = this.queryEffectiveChildren('template');
+        this._menuData = {
+          cell: event.detail.cell,
+          row: event.detail.row
+        };
+
+        this._contextMenu = template.stamp(this._menuData).root.firstElementChild;
+        Polymer.dom(this).appendChild(this._contextMenu);
+
+        this._contextMenu.addEventListener('iron-overlay-closed', function(event) {
+          var closedContextMenu = event.currentTarget;
+          if (closedContextMenu.isAttached) {
+            Polymer.dom(this).removeChild(closedContextMenu);
+          }
+          if (this._contextMenu === closedContextMenu) {
+            this._contextMenu = undefined;
+          }
+        }.bind(this));
+
+        this._contextMenu.open(event);
+      },
+
+      _onMenuItemClick: function(event) {
+        if (!event.detail || Object.keys(event.detail).length === 0) {
+          this.fire('grid-menu-item-click', this._menuData, {node: event.target});
+        }
+      }
+
+    });
+  </script>
+</dom-module>

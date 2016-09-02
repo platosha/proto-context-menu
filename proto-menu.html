@@ -1,0 +1,40 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-menu-behavior/iron-menu-behavior.html">
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../paper-styles/shadow.html">
+<link rel="import" href="../paper-styles/default-theme.html">
+<link rel="import" href="proto-menu-item.html">
+
+<dom-module id="proto-menu">
+  <template>
+    <style>
+      :host {
+        @apply(--shadow-elevation-8dp);
+        background: var(--primary-background-color);
+        color: var(--primary-text-color);
+        display: block;
+      }
+
+      :host ::content proto-menu {
+        margin-top: 8px;
+      }
+    </style>
+    <content></content>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'proto-menu',
+
+      properties: {
+      },
+
+      behaviors: [
+        Polymer.IronMenuBehavior,
+        Polymer.IronOverlayBehavior,
+      ]
+
+    });
+  </script>
+</dom-module>

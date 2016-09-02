@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <title>proto-context-menu demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../proto-context-menu.html">
+    <link rel="import" href="../../paper-material/paper-material.html">
+    <link rel="import" href="../../vaadin-grid/vaadin-grid.html">
+    <link rel="import" href="../proto-grid-context-menu.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+      .centered {
+        max-width: 800px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic proto-context-menu Demo</h3>
+      <demo-snippet>
+        <template>
+          <paper-material elevation="1" style="padding: 48px; text-align: center;">
+            Click me
+            <proto-context-menu>
+              <proto-menu>
+                <proto-menu-item>One</proto-menu-item>
+                <proto-menu-item>Two</proto-menu-item>
+                <proto-menu-item>Three</proto-menu-item>
+                <proto-menu-item>More
+                  <proto-menu>
+                    <proto-menu-item>Four</proto-menu-item>
+                    <proto-menu-item>Five</proto-menu-item>
+                    <proto-menu-item>Size</proto-menu-item>
+                  </proto-menu>
+                </proto-menu-item>
+              </proto-menu>
+            </proto-context-menu>
+          </paper-material>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div>
+      <h3>Vaadin Grid Context Menu Demo</h3>
+      <demo-snippet>
+        <template>
+          <dom-module is="grid-view">
+            <template>
+              <proto-grid-context-menu on-grid-menu-item-click="_onGridMenuItemClick">
+                <template is="dom-template">
+                  <proto-context-menu id="contextMenu">
+                    <proto-menu>
+                      <proto-menu-item><b>Cell [[cell.index]]</b></proto-menu-item>
+                      <proto-menu-item>Column name: [[cell.columnName]]</proto-menu-item>
+                      <proto-menu-item>Data: [[cell.data]]</proto-menu-item>
+                      <proto-menu-item><b>Row [[row.index]]</b></proto-menu-item>
+                      <proto-menu-item>Data: [[row.data]]</proto-menu-item>
+                    </proto-menu>
+                  </proto-context-menu>
+                </template>
+                <vaadin-grid id="grid">
+                  <table>
+                    <colgroup>
+                      <col name="firstName">
+                      <col name="lastName">
+                      <col name="email">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th>Progress</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Jonathan</td>
+                        <td>Doe</td>
+                        <td>jonathan.doe@example.com</td>
+                      </tr>
+                      <tr>
+                        <td>Jane</td>
+                        <td>Smith</td>
+                        <td>jane.smith@example.com</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </vaadin-grid>
+              </proto-grid-context-menu>
+            </template>
+
+            <script>
+              Polymer({
+                is: 'grid-view',
+
+                ready: function() {
+                  /* TODO: This should be implemented in the grid */
+                  var grid = this.$.grid;
+                  grid.cellClassGenerator = function(cell) {
+                    cell.element._dataContext = {
+                      cell: {
+                        index: cell.index,
+                        columnName: cell.columnName,
+                        data: cell.data,
+                        element: cell.element
+                      },
+                      row: {
+                        index: cell.row.index,
+                        data: cell.row.data,
+                        element: cell.row.element
+                      }
+                    };
+                  };
+                  grid.oncontextmenu = function(event) {
+                    var td = Polymer.dom(event).path.find(function(node) {
+                      return node.classList && node.classList.contains('vaadin-grid-cell');
+                    });
+                    if (td && td._dataContext) {
+                      var detail = {
+                        x: event.clientX,
+                        y: event.clientY
+                      };
+                      Object.getOwnPropertyNames(td._dataContext).forEach(function(key) {
+                        detail[key] = td._dataContext[key];
+                      });
+                      var childEvent = grid.fire('grid-context-menu', detail, {bubbles: true, cancelable: true});
+                      if (childEvent.defaultPrevented) {
+                        event.preventDefault();
+                      }
+                      return childEvent;
+                    }
+                  };
+                },
+
+                _onGridMenuItemClick: function(event) {
+                  console.log('Menu item click ', event.target.textContent, event.detail);
+                }
+              });
+            </script>
+          </dom-module>
+
+          <grid-view></grid-view>
+        </template>
+      </demo-snippet>
+    </div>
+
+  </body>
+</html>

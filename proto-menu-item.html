@@ -1,0 +1,59 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-item/paper-item-behavior.html">
+
+<dom-module id="proto-menu-item">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        padding: 8px 16px;
+        position: relative;
+      }
+    </style>
+    <content></content>
+    <div class="nested-arrow" hidden$="[[!_nestedMenu]]">&nbsp;&rarr;</div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'proto-menu-item',
+
+      behaviors: [
+        Polymer.PaperItemBehavior
+      ],
+
+      properties: {
+        _nestedMenu: Element
+      },
+
+      listeners: {
+        tap: '_onTap'
+      },
+
+      attached: function() {
+        this._nestedMenu = null;
+        this._nestedMenuObserver = Polymer.dom(this).observeNodes(function() {
+          this._nestedMenu = this.queryEffectiveChildren('proto-menu');
+        }.bind(this));
+      },
+
+      detached: function() {
+        Polymer.dom(this).unobserveNodes(this._nestedMenuObserver);
+      },
+
+      _hasNestedMenu: function(nestedMenu) {
+        return Boolean(nestedMenu);
+      },
+
+      _onTap: function(event) {
+        if (!this._nestedMenu || Polymer.dom(event).path.indexOf(this._nestedMenu) === -1) {
+          this.fire('menu-item-click');
+        }
+      },
+
+    });
+  </script>
+</dom-module>

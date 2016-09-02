@@ -1,0 +1,87 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="proto-menu.html">
+
+<!--
+`proto-context-menu`
+Context menu element prototype
+
+@demo demo/index.html 
+-->
+
+<dom-module id="proto-context-menu">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <content id="content"></content>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'proto-context-menu',
+
+      properties: {
+        _listenerBound: {
+          type: 'Function',
+          value: function() {
+            return this._listener.bind(this);
+          }
+        },
+
+        disabled: {
+          type: Boolean,
+          reflectToAttribute: true
+        }
+      },
+
+      get _menu() {
+        return this.queryEffectiveChildren('proto-menu');
+      },
+
+      open: function(event) {
+        if (this.disabled) {
+          return;
+        }
+
+        event.preventDefault();
+
+        var x = event.detail && event.detail.x || event.clientX;
+        var y = event.detail && event.detail.y || event.clientY;
+
+        var menu = this._menu;
+        menu.resetFit();
+        menu.style.position = 'fixed';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+
+        menu.open();
+      },
+
+      close: function() {
+        this._menu.close();
+      },
+
+      cancel: function() {
+        this._menu.cancel();
+      },
+
+      _listener: function(event) {
+        this.open(event);
+      },
+
+      attached: function() {
+        this._parent = Polymer.dom(this).parentNode;
+        this._parent.addEventListener('contextmenu', this._listenerBound);
+      },
+
+      detached: function() {
+        this._parent.removeEventListener('contextmenu', this._listenerBound);
+        this._parent = undefined;
+      }
+
+    });
+  </script>
+</dom-module>
