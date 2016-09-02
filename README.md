@@ -1,3 +1,3 @@
 # \<proto-context-menu\>
 
-Context menu element prototype
+Context menu Polymer element prototype
